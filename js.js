@@ -80,7 +80,7 @@ async function getTasks() {
 async function getTask(task) {
     let li = document.createElement('li');
     li.innerHTML = task.description;
-
+    li.id=task.id;
     let button = document.createElement('button');
     button.className = 'edit';
     let img = document.createElement('img');
@@ -94,6 +94,7 @@ async function getTask(task) {
     li.appendChild(span);
 
     todoList.appendChild(li);
+
 }
 
 todoList.addEventListener('click', async function (event) {
@@ -102,17 +103,7 @@ todoList.addEventListener('click', async function (event) {
     }
     else if (event.target.tagName === 'SPAN') {
         //delete запрос
-        let idd = event.target.parentElement.textContent;
-        let taskId = 0;
-        for (let i of list) {
-            if (i.description + '\u00d7' == idd) {
-                taskId = i.id;
-                break;
-            }
-            console.log(i.description);
-        }
-
-        console.log(taskId);
+        let taskId = event.target.parentElement.id;
         try {
             let response = await fetch(`http://localhost:5186/api/todo/${taskId}`, {
                 method: 'DELETE' // Указываем метод DELETE
@@ -123,10 +114,10 @@ todoList.addEventListener('click', async function (event) {
         }
         catch (error) {
             console.error('Ошибка:', error);
-            alert('Не удалось добавить задачу. Попробуйте снова.');
+            alert('Не удалось удалить задачу. Попробуйте снова.');
         }
-        
-        
+
+
     }
     else if (event.target.className === 'Edit') {
         let currentLi = event.target.parentElement.parentElement;
@@ -134,7 +125,23 @@ todoList.addEventListener('click', async function (event) {
         let editedText = prompt("Редактировать дело:", currentText);
         if (editedText !== null && editedText !== '') {
             //put запрос
-            //currentLi.firstChild.textContent = editedText;
+            let taskId = currentLi.id;
+            try {
+                let response = await fetch(`http://localhost:5186/api/todo/${taskId}`, {
+                    method: 'PUT', // Указываем метод PUT
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(editedText)
+                });
+                if (!response.ok) {
+                    throw new Error('Ошибка сети');
+                }
+            }
+            catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось изменить задачу. Попробуйте снова.');
+            }
         }
 
     }
