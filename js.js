@@ -80,7 +80,19 @@ async function getTasks() {
 async function getTask(task) {
     let li = document.createElement('li');
     li.innerHTML = task.description;
-    li.id=task.id;
+    li.id = task.id;
+    li.setAttribute('data-completed', task.status);
+    const status = li.getAttribute('data-completed');
+    console.log(status);
+    if(status=='true')
+    {
+        li.classList.toggle('check');
+    }
+    /*else if(status=='false')
+    {
+        li.classList.toggle('check');
+    }*/
+
     let button = document.createElement('button');
     button.className = 'edit';
     let img = document.createElement('img');
@@ -99,7 +111,43 @@ async function getTask(task) {
 
 todoList.addEventListener('click', async function (event) {
     if (event.target.tagName === 'LI') {
-        event.target.classList.toggle('check');
+        
+        let taskId = event.target.id;
+        const status = event.target.getAttribute('data-completed');
+        console.log(taskId);
+        //patch запрос (не сделано)
+        if(status=='true')
+        {
+            try {
+                let response = await fetch(`http://localhost:5186/api/todo/${taskId}/incomplete`, {
+                    method: 'PATCH' // Указываем метод PATCH
+                });
+                if (!response.ok) {
+                    throw new Error('Ошибка сети');
+                }
+            }
+            catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось изменить статус задачи. Попробуйте снова.');
+            }
+        }
+        //patch запрос (сделано)
+        else if(status=='false')
+        {
+            try {
+                let response = await fetch(`http://localhost:5186/api/todo/${taskId}/complete`, {
+                    method: 'PATCH' // Указываем метод PATCH
+                });
+                if (!response.ok) {
+                    throw new Error('Ошибка сети');
+                }
+            }
+            catch (error) {
+                console.error('Ошибка:', error);
+                alert('Не удалось изменить статус задачи. Попробуйте снова.');
+            }
+        }
+        //event.target.classList.toggle('check');
     }
     else if (event.target.tagName === 'SPAN') {
         //delete запрос
