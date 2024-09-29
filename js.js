@@ -24,37 +24,39 @@ fetch(url)
         console.error('There has been a problem with your fetch operation:', error);
     });
 
-function addTask() {
+async function addTask() {
     if (todoInput.value === '') {
         alert("Введите дело");
     }
     else {
         let task = todoInput.value;
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(task)
-        })
-        .then(response => {
-            // Проверка, успешен ли ответ
+        try {
+            let response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(task)
+            });
             if (!response.ok) {
                 throw new Error('Ошибка сети');
             }
-            //return response.json(); // Преобразуем ответ в формат JSON
-        })
-        .catch (error=> {
+        }
+        catch (error) {
             console.error('Ошибка:', error);
             alert('Не удалось добавить задачу. Попробуйте снова.');
-        });
+        }
     }
     todoInput.value = "";
     getTasks();
 }
 
-function getTasks() {
+async function getTasks() {
     fetch(url)
+        /* if (response.ok) { // если HTTP-статус в диапазоне 200-299
+             // получаем тело ответа (см. про этот метод ниже)
+             let json = await response.json();
+           } */
         .then(response => {
             // Проверка, успешен ли ответ
             if (!response.ok) {
@@ -75,7 +77,7 @@ function getTasks() {
         });
 }
 
-function getTask(task) {
+async function getTask(task) {
     let li = document.createElement('li');
     li.innerHTML = task.description;
 
@@ -94,7 +96,7 @@ function getTask(task) {
     todoList.appendChild(li);
 }
 
-/*todoList.addEventListener('click', function (event) {
+todoList.addEventListener('click', async function (event) {
     if (event.target.tagName === 'LI') {
         event.target.classList.toggle('check');
     }
@@ -111,20 +113,20 @@ function getTask(task) {
         }
 
         console.log(taskId);
-        fetch(`http://localhost:5186/api/todo/${taskId}`, {
-            method: 'DELETE' // Указываем метод DELETE
-        })
-            .then(response => {
-                if (response.ok) {
-                    console.log('Ресурс успешно удален'); // Успешное удаление
-                } else {
-                    console.error('Ошибка при удалении ресурса:', response.statusText); // Ошибка удаления
-                }
-            })
-            .catch(error => {
-                console.error('Произошла ошибка:', error); // Ошибка сети или другие ошибки
+        try {
+            let response = await fetch(`http://localhost:5186/api/todo/${taskId}`, {
+                method: 'DELETE' // Указываем метод DELETE
             });
-        getTasks();
+            if (!response.ok) {
+                throw new Error('Ошибка сети');
+            }
+        }
+        catch (error) {
+            console.error('Ошибка:', error);
+            alert('Не удалось добавить задачу. Попробуйте снова.');
+        }
+        
+        
     }
     else if (event.target.className === 'Edit') {
         let currentLi = event.target.parentElement.parentElement;
@@ -136,7 +138,8 @@ function getTask(task) {
         }
 
     }
-}, false);*/
+    getTasks();
+}, false);
 
 /*function addTask() {
     if (todoInput.value === '') {
